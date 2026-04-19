@@ -1,0 +1,31 @@
+# 1С служебные
+*.1CD
+*.log
+*.dt
+*.pfl
+DumpIB.zip
+
+# Docker (платформа 1С слишком большая для репо)
+docker/platform/*.deb
+docker/platform/*.tar.gz
+docker/platform/*.rpm
+docker/platform/*.run
+docker-compose.override.yml
+
+# Отчёты
+reports/*.xml
+reports/*.html
+reports/*.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# IDE
+.idea/
+.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db
