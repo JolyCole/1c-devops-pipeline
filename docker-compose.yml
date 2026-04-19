@@ -1,0 +1,54 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: onec-postgres
+    environment:
+      POSTGRES_PASSWORD: postgres1c
+      POSTGRES_DB: onec_testdb
+      LC_COLLATE: ru_RU.UTF-8
+      LC_CTYPE: ru_RU.UTF-8
+      POSTGRES_INITDB_ARGS: "--locale=C --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - onec-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  onec:
+    build:
+      context: ./docker
+      dockerfile: onec/Dockerfile
+    image: onec-test:latest
+    container_name: onec-test
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DISPLAY: ":99"
+    volumes:
+      - ./config:/workspace/config:ro
+      - ./tests:/workspace/tests:ro
+      - ./scripts:/workspace/scripts:ro
+      - ./reports:/workspace/reports
+      - ./docker/licenses:/var/1C/licenses:ro
+    networks:
+      - onec-net
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+    command: >
+      bash -c "Xvfb :99 -screen 0 1024x768x16 & sleep 2 && tail -f /dev/null"
+
+volumes:
+  pg-data:
+
+networks:
+  onec-net:
+    driver: bridge
