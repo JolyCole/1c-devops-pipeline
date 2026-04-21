@@ -125,7 +125,7 @@ test-bdd-smoke:
   needs:
     - build-managed
   script:
-    - echo "═══ BDD smoke: открытие ключевых форм УП ═══"
+    - echo "BDD smoke - otkrytie klyuchevyh form UP"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature
   artifacts:
     when: always
@@ -140,7 +140,7 @@ test-bdd-regression:
   needs:
     - build-managed
   script:
-    - echo "═══ BDD regression: CRUD-операции справочников УП ═══"
+    - echo "BDD regression - CRUD operacii spravochnikov UP"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature
   artifacts:
     when: always
@@ -155,7 +155,7 @@ test-bdd-functional:
   needs:
     - build-managed
   script:
-    - echo "═══ BDD functional: бизнес-сценарии навигации УП ═══"
+    - echo "BDD functional - biznes-scenarii navigacii UP"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature
   artifacts:
     when: always
