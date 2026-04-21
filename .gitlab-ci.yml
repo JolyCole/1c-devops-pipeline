@@ -1,7 +1,8 @@
 # CI/CD пайплайн для автоматизации тестирования конфигураций 1С:Предприятие
 # ВКР Филимонов И.Д., МТУСИ, 2026
 # 4 стадии: build → deploy → test → report
-# 3 конфигурации: DemoVKR (XML), мобильная (CF), Управляемое приложение (DT)
+# Основная конфигурация: Управляемое приложение (УП) от 1С
+# Референсные: DemoVKR (XML), мобильная 1С (CF) — для демонстрации универсальности метода
 
 stages:
   - build
@@ -13,28 +14,44 @@ variables:
   PLATFORM_PATH: "/opt/1cv8/x86_64/8.3.27.1936"
   ASSETS_CACHE: "/var/cache/1c-ci-assets"
 
-# ============================================================
-# Общие экспорты для всех джоб, работающих с платформой 1С
-# ============================================================
 default:
   before_script:
     - export PATH="$PATH:/opt/onescript/bin:/home/filimonov/.local/bin"
     - export LANG=ru_RU.UTF-8
     - export LC_ALL=ru_RU.UTF-8
+  after_script:
+    # Гарантированно убираем процессы 1С после каждой джобы,
+    # чтобы следующая джоба не столкнулась с занятой лицензией/портами.
+    - pkill -9 -f "1cv8c.*TESTCLIENT" 2>/dev/null || true
+    - pkill -9 -f "vrunner" 2>/dev/null || true
+    - rm -f /tmp/v8_*.tmp 2>/dev/null || true
 
 # ============================================================
-# STAGE 1: BUILD — сборка файловых ИБ из каждой конфигурации
+# STAGE 1: BUILD — сборка файловых ИБ из трёх конфигураций
 # ============================================================
+
+build:managed:
+  stage: build
+  script:
+    - echo "═══ Сборка Управляемого приложения (основная, из .dt) ═══"
+    - mkdir -p build/ib_managed
+    - rm -rf build/ib_managed/*
+    - cp $ASSETS_CACHE/managed-app.dt $CI_PROJECT_DIR/config/managed-app.dt
+    - $PLATFORM_PATH/ibcmd infobase create --database-path=$CI_PROJECT_DIR/build/ib_managed --restore=$CI_PROJECT_DIR/config/managed-app.dt --locale=ru
+    - ls -la build/ib_managed/ | head -8
+  artifacts:
+    paths:
+      - build/ib_managed/
+    expire_in: 1 day
 
 build:demovkr:
   stage: build
   script:
-    - echo "═══ Сборка DemoVKR (XML-исходники) ═══"
+    - echo "═══ Сборка DemoVKR (референс, из XML-исходников) ═══"
     - mkdir -p build/ib_demovkr
     - rm -rf build/ib_demovkr/*
     - $PLATFORM_PATH/ibcmd infobase create --db-path=$CI_PROJECT_DIR/build/ib_demovkr --import=$CI_PROJECT_DIR/config/demo-config
-    - echo "Готова файловая ИБ:"
-    - ls -la build/ib_demovkr/
+    - ls -la build/ib_demovkr/ | head -8
   artifacts:
     paths:
       - build/ib_demovkr/
@@ -43,41 +60,29 @@ build:demovkr:
 build:mobile:
   stage: build
   script:
-    - echo "═══ Сборка мобильной демо 1С (из .cf) ═══"
+    - echo "═══ Сборка мобильной конфигурации (референс, из .cf) ═══"
     - mkdir -p build/ib_mobile
     - rm -rf build/ib_mobile/*
     - vrunner init-dev --cf $CI_PROJECT_DIR/config/mobile-demo.cf --ibconnection "/F$CI_PROJECT_DIR/build/ib_mobile" --ibcmd
-    - ls -la build/ib_mobile/
+    - ls -la build/ib_mobile/ | head -8
   artifacts:
     paths:
       - build/ib_mobile/
     expire_in: 1 day
 
-build:managed:
-  stage: build
-  script:
-    - echo "═══ Сборка УП (из .dt, pre-staged ассет) ═══"
-    - mkdir -p build/ib_managed
-    - rm -rf build/ib_managed/*
-    - echo "Копирую managed-app.dt из локального кэша ассетов..."
-    - cp $ASSETS_CACHE/managed-app.dt $CI_PROJECT_DIR/config/managed-app.dt
-    - $PLATFORM_PATH/ibcmd infobase create --database-path=$CI_PROJECT_DIR/build/ib_managed --restore=$CI_PROJECT_DIR/config/managed-app.dt --locale=ru
-    - ls -la build/ib_managed/
-  artifacts:
-    paths:
-      - build/ib_managed/
-    expire_in: 1 day
-
 # ============================================================
-# STAGE 2: DEPLOY — развёртывание клиент-серверного стенда
+# STAGE 2: DEPLOY — развёртывание стенда
 # ============================================================
 
 deploy:stand:
   stage: deploy
+  needs:
+    - build:managed
   script:
-    - echo "═══ Развёртывание стенда через deploy.py ═══"
+    - echo "═══ Развёртывание стенда через scripts/deploy.py ═══"
+    - cp $ASSETS_CACHE/managed-app.dt $CI_PROJECT_DIR/config/managed-app.dt
     - python3 scripts/deploy.py 2>&1 | tee deploy.log
-    - echo "Проверяем что PostgreSQL и ИБ подняты:"
+    - echo "PostgreSQL контейнер:"
     - docker compose ps
   artifacts:
     when: always
@@ -87,55 +92,16 @@ deploy:stand:
   allow_failure: true
 
 # ============================================================
-# STAGE 3: TEST — синтаксический анализ, компиляция, BDD
+# STAGE 3: TEST
 # ============================================================
-
-test:syntax:demovkr:
-  stage: test
-  needs:
-    - build:demovkr
-  script:
-    - echo "═══ Синтаксический анализ DemoVKR ═══"
-    - mkdir -p reports
-    - xvfb-run -a vrunner syntax-check --ibconnection "/F$CI_PROJECT_DIR/build/ib_demovkr" --junitpath reports/syntax-demovkr.xml
-  artifacts:
-    when: always
-    paths:
-      - reports/
-    reports:
-      junit: reports/syntax-demovkr.xml
-    expire_in: 1 week
-
-test:compile:demovkr:
-  stage: test
-  needs:
-    - build:demovkr
-  script:
-    - echo "═══ Компиляция DemoVKR в .cf ═══"
-    - mkdir -p reports
-    - xvfb-run -a vrunner compile --src $CI_PROJECT_DIR/config/demo-config --out reports/DemoVKR.cf
-    - ls -la reports/
-  artifacts:
-    paths:
-      - reports/DemoVKR.cf
-    expire_in: 1 week
-
-test:syntax:mobile:
-  stage: test
-  needs:
-    - build:mobile
-  allow_failure: true
-  script:
-    - echo "═══ Синтаксический анализ мобильной демо ═══"
-    - mkdir -p reports
-    - xvfb-run -a vrunner syntax-check --ibconnection "/F$CI_PROJECT_DIR/build/ib_mobile" --junitpath reports/syntax-mobile.xml
-  artifacts:
-    when: always
-    paths:
-      - reports/
-    reports:
-      junit: reports/syntax-mobile.xml
-    expire_in: 1 week
+# Глубокое тестирование Управляемого приложения (основная):
+#   - синтаксический анализ (всей конфигурации)
+#   - BDD smoke (открытие ключевых форм)
+#   - BDD regression (CRUD операции)
+#   - BDD functional (бизнес-сценарии навигации)
+# Для референсных (DemoVKR + мобильная):
+#   - только syntax-check для демонстрации универсальности метода
+# ============================================================
 
 test:syntax:managed:
   stage: test
@@ -143,7 +109,7 @@ test:syntax:managed:
     - build:managed
   allow_failure: true
   script:
-    - echo "═══ Синтаксический анализ УП ═══"
+    - echo "═══ Синтаксический анализ Управляемого приложения ═══"
     - mkdir -p reports
     - xvfb-run -a vrunner syntax-check --ibconnection "/F$CI_PROJECT_DIR/build/ib_managed" --db-user "Администратор" --db-pwd "" --junitpath reports/syntax-managed.xml
   artifacts:
@@ -154,17 +120,13 @@ test:syntax:managed:
       junit: reports/syntax-managed.xml
     expire_in: 1 week
 
-test:bdd:managed:
+test:bdd:managed:smoke:
   stage: test
   needs:
     - build:managed
-  allow_failure: true
   script:
-    - echo "═══ BDD-тесты Vanessa для УП ═══"
-    - mkdir -p reports/vanessa/junit reports/vanessa/logs
-    - xvfb-run -a vrunner vanessa --ibconnection "/F$CI_PROJECT_DIR/build/ib_managed" --db-user "Администратор" --db-pwd "" --path tests/features/smoke/01_managed_smoke.feature --pathvanessa tools/vanessa/vanessa-automation/vanessa-automation.epf --vanessasettings tests/VAParams.json
-    - echo "Результаты BDD:"
-    - cat reports/vanessa/junit/junit.xml || echo "JUnit не создан"
+    - echo "═══ BDD smoke: открытие ключевых форм УП ═══"
+    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature "$CI_PROJECT_DIR/build/ib_managed"
   artifacts:
     when: always
     paths:
@@ -173,8 +135,71 @@ test:bdd:managed:
       junit: reports/vanessa/junit/junit.xml
     expire_in: 1 week
 
+test:bdd:managed:regression:
+  stage: test
+  needs:
+    - build:managed
+  script:
+    - echo "═══ BDD regression: CRUD-операции справочников УП ═══"
+    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature "$CI_PROJECT_DIR/build/ib_managed"
+  artifacts:
+    when: always
+    paths:
+      - reports/vanessa/
+    reports:
+      junit: reports/vanessa/junit/junit.xml
+    expire_in: 1 week
+
+test:bdd:managed:functional:
+  stage: test
+  needs:
+    - build:managed
+  script:
+    - echo "═══ BDD functional: бизнес-сценарии навигации УП ═══"
+    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature "$CI_PROJECT_DIR/build/ib_managed"
+  artifacts:
+    when: always
+    paths:
+      - reports/vanessa/
+    reports:
+      junit: reports/vanessa/junit/junit.xml
+    expire_in: 1 week
+
+test:syntax:demovkr:
+  stage: test
+  needs:
+    - build:demovkr
+  script:
+    - echo "═══ Синтаксический анализ DemoVKR (референс) ═══"
+    - mkdir -p reports
+    - xvfb-run -a vrunner syntax-check --ibconnection "/F$CI_PROJECT_DIR/build/ib_demovkr" --junitpath reports/syntax-demovkr.xml
+  artifacts:
+    when: always
+    paths:
+      - reports/
+    reports:
+      junit: reports/syntax-demovkr.xml
+    expire_in: 1 week
+
+test:syntax:mobile:
+  stage: test
+  needs:
+    - build:mobile
+  allow_failure: true
+  script:
+    - echo "═══ Синтаксический анализ мобильной (референс) ═══"
+    - mkdir -p reports
+    - xvfb-run -a vrunner syntax-check --ibconnection "/F$CI_PROJECT_DIR/build/ib_mobile" --junitpath reports/syntax-mobile.xml
+  artifacts:
+    when: always
+    paths:
+      - reports/
+    reports:
+      junit: reports/syntax-mobile.xml
+    expire_in: 1 week
+
 # ============================================================
-# STAGE 4: REPORT — агрегация JUnit-отчётов в единый HTML
+# STAGE 4: REPORT — агрегация JUnit в единый HTML
 # ============================================================
 
 report:junit:aggregate:
@@ -183,12 +208,15 @@ report:junit:aggregate:
   script:
     - echo "═══ Агрегация JUnit XML в единый HTML-отчёт ═══"
     - mkdir -p reports/html
-    - ls -la reports/ || true
+    - find reports -name "*.xml" -type f 2>/dev/null || true
     - |
-      if ls reports/*.xml reports/vanessa/junit/*.xml 2>/dev/null; then
-        python3 -m junit2htmlreport --merge reports/merged.xml reports/*.xml reports/vanessa/junit/*.xml 2>&1 || true
+      JUNIT_FILES=$(find reports -name "*.xml" -type f 2>/dev/null)
+      if [ -n "$JUNIT_FILES" ]; then
+        echo "Найдены JUnit файлы:"
+        echo "$JUNIT_FILES"
+        python3 -m junit2htmlreport --merge reports/merged.xml $JUNIT_FILES 2>&1 || true
         python3 -m junit2htmlreport reports/merged.xml reports/html/aggregated-report.html 2>&1 || true
-        echo "HTML-отчёт готов:"
+        echo "═══ HTML-отчёт ═══"
         ls -la reports/html/
       else
         echo "Нет JUnit XML для агрегации"

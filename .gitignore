@@ -57,3 +57,4 @@ deploy.log
 # Vanessa Automation — результаты прогонов (JUnit, скриншоты, status) регенерируются каждый раз
 reports/vanessa/**/*
 !reports/vanessa/**/.gitkeep
+.gitlab-ci.yml.v2-backup
