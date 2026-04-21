@@ -120,7 +120,7 @@ test:syntax:managed:
       junit: reports/syntax-managed.xml
     expire_in: 1 week
 
-test:bdd:managed:smoke:
+test:bdd-smoke:
   stage: test
   needs:
     - build:managed
@@ -135,7 +135,7 @@ test:bdd:managed:smoke:
       junit: reports/vanessa/junit/junit.xml
     expire_in: 1 week
 
-test:bdd:managed:regression:
+test:bdd-regression:
   stage: test
   needs:
     - build:managed
@@ -150,7 +150,7 @@ test:bdd:managed:regression:
       junit: reports/vanessa/junit/junit.xml
     expire_in: 1 week
 
-test:bdd:managed:functional:
+test:bdd-functional:
   stage: test
   needs:
     - build:managed
