@@ -103,7 +103,7 @@ deploy:stand:
 #   - только syntax-check для демонстрации универсальности метода
 # ============================================================
 
-test:syntax:managed:
+test-syntax-managed:
   stage: test
   needs:
     - build:managed
@@ -120,7 +120,7 @@ test:syntax:managed:
       junit: reports/syntax-managed.xml
     expire_in: 1 week
 
-test:bdd-smoke:
+test-bdd-smoke:
   stage: test
   needs:
     - build:managed
@@ -135,7 +135,7 @@ test:bdd-smoke:
       junit: reports/vanessa/junit/junit.xml
     expire_in: 1 week
 
-test:bdd-regression:
+test-bdd-regression:
   stage: test
   needs:
     - build:managed
@@ -150,7 +150,7 @@ test:bdd-regression:
       junit: reports/vanessa/junit/junit.xml
     expire_in: 1 week
 
-test:bdd-functional:
+test-bdd-functional:
   stage: test
   needs:
     - build:managed
@@ -165,7 +165,7 @@ test:bdd-functional:
       junit: reports/vanessa/junit/junit.xml
     expire_in: 1 week
 
-test:syntax:demovkr:
+test-syntax-demovkr:
   stage: test
   needs:
     - build:demovkr
@@ -181,7 +181,7 @@ test:syntax:demovkr:
       junit: reports/syntax-demovkr.xml
     expire_in: 1 week
 
-test:syntax:mobile:
+test-syntax-mobile:
   stage: test
   needs:
     - build:mobile
@@ -202,7 +202,7 @@ test:syntax:mobile:
 # STAGE 4: REPORT — агрегация JUnit в единый HTML
 # ============================================================
 
-report:junit:aggregate:
+report-junit-aggregate:
   stage: report
   when: always
   script:
