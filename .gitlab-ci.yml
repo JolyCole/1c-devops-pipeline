@@ -126,7 +126,7 @@ test:bdd-smoke:
     - build:managed
   script:
     - echo "═══ BDD smoke: открытие ключевых форм УП ═══"
-    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature "$CI_PROJECT_DIR/build/ib_managed"
+    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature
   artifacts:
     when: always
     paths:
@@ -141,7 +141,7 @@ test:bdd-regression:
     - build:managed
   script:
     - echo "═══ BDD regression: CRUD-операции справочников УП ═══"
-    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature "$CI_PROJECT_DIR/build/ib_managed"
+    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature
   artifacts:
     when: always
     paths:
@@ -156,7 +156,7 @@ test:bdd-functional:
     - build:managed
   script:
     - echo "═══ BDD functional: бизнес-сценарии навигации УП ═══"
-    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature "$CI_PROJECT_DIR/build/ib_managed"
+    - xvfb-run -a ./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature
   artifacts:
     when: always
     paths:
