@@ -53,5 +53,7 @@ ib_*;Usr=*
 # Лог deploy.py (генерируется при каждом запуске)
 deploy.log
 
-# Лог deploy.py (генерируется при каждом запуске)
-deploy.log
+
+# Vanessa Automation — результаты прогонов (JUnit, скриншоты, status) регенерируются каждый раз
+reports/vanessa/**/*
+!reports/vanessa/**/.gitkeep
