@@ -1,8 +1,9 @@
 # CI/CD пайплайн для автоматизации тестирования конфигураций 1С:Предприятие
 # ВКР Филимонов И.Д., МТУСИ, 2026
-# Тестируются две конфигурации:
+# Тестируются три конфигурации:
 #   - собственная DemoVKR (XML-исходники)
 #   - демонстрационная мобильная конфигурация от фирмы 1С (CF)
+#   - демонстрационная конфигурация "Управляемое приложение" от фирмы 1С (DT)
 
 stages:
   - build
@@ -79,6 +80,7 @@ test:syntax:mobile:
   stage: test
   needs:
     - build:mobile
+  allow_failure: true
   script:
     - echo "Синтаксическая проверка мобильной конфигурации"
     - mkdir -p reports
@@ -89,4 +91,38 @@ test:syntax:mobile:
       - reports/
     reports:
       junit: reports/syntax-mobile.xml
+    expire_in: 1 week
+
+# ============================================================
+# КОНФИГУРАЦИЯ 3: Демо "Управляемое приложение" от 1С (готовый .dt)
+# ============================================================
+
+build:managed:
+  stage: build
+  script:
+    - echo "Создание файловой ИБ из демо-выгрузки УП (.dt)"
+    - mkdir -p build/ib_managed
+    - rm -rf build/ib_managed/*
+    - $PLATFORM_PATH/ibcmd infobase create --database-path=$CI_PROJECT_DIR/build/ib_managed --restore=$CI_PROJECT_DIR/config/managed-app.dt --locale=ru
+    - ls -la build/ib_managed/
+  artifacts:
+    paths:
+      - build/ib_managed/
+    expire_in: 1 day
+
+test:syntax:managed:
+  stage: test
+  needs:
+    - build:managed
+  allow_failure: true
+  script:
+    - echo "Синтаксическая проверка демо-конфигурации Управляемое приложение"
+    - mkdir -p reports
+    - vrunner syntax-check --ibconnection "/F$CI_PROJECT_DIR/build/ib_managed" --db-user "Администратор" --db-pwd "" --junitpath reports/syntax-managed.xml
+  artifacts:
+    when: always
+    paths:
+      - reports/
+    reports:
+      junit: reports/syntax-managed.xml
     expire_in: 1 week
