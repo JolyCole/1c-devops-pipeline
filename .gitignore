@@ -45,3 +45,7 @@ tools/vanessa/vanessa-automation/
 # Временные
 *.tmp
 *.bak
+
+# Артефакты неправильных командных строк 1С (bash не распарсил ; в --ibconnection)
+ib_managed;*
+ib_*;Usr=*
