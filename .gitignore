@@ -49,3 +49,9 @@ tools/vanessa/vanessa-automation/
 # Артефакты неправильных командных строк 1С (bash не распарсил ; в --ibconnection)
 ib_managed;*
 ib_*;Usr=*
+
+# Лог deploy.py (генерируется при каждом запуске)
+deploy.log
+
+# Лог deploy.py (генерируется при каждом запуске)
+deploy.log
