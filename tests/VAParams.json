@@ -1,0 +1,15 @@
+{
+    "Lang": "ru",
+    "КаталогПроекта": "/home/filimonov/1c-devops-pipeline",
+    "КаталогИнструментов": "/home/filimonov/1c-devops-pipeline/tools/vanessa/vanessa-automation",
+    "КаталогФич": "/home/filimonov/1c-devops-pipeline/tests/features/smoke",
+    "КаталогВременныхФайлов": "/tmp",
+    "ВыполнитьСценарии": true,
+    "ЗавершитьРаботуСистемы": true,
+    "ДелатьОтчетВФорматеjUnit": true,
+    "КаталогВыгрузкиJUnit": "/home/filimonov/1c-devops-pipeline/reports/vanessa/junit",
+    "ДелатьОтчетВФорматеАллюр": false,
+    "ВыгружатьСтатусВыполненияСценариевВФайл": true,
+    "ПутьКФайлуДляВыгрузкиСтатусаВыполненияСценариев": "/home/filimonov/1c-devops-pipeline/reports/vanessa/logs/status.txt",
+    "ДелатьСкриншотПриВозникновенииОшибки": false
+}
