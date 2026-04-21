@@ -1,18 +1,18 @@
 services:
 
   postgres:
-    image: postgres:16
+    build:
+      context: ./docker
+      dockerfile: postgres/Dockerfile
+    image: onec-postgres:latest
     container_name: onec-postgres
     environment:
       POSTGRES_PASSWORD: postgres1c
-      POSTGRES_DB: onec_testdb
-      LC_COLLATE: ru_RU.UTF-8
-      LC_CTYPE: ru_RU.UTF-8
-      POSTGRES_INITDB_ARGS: "--locale=C --lc-collate=C --lc-ctype=C"
+      POSTGRES_DB: demo_vkr
     ports:
       - "5432:5432"
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/16/main
     networks:
       - onec-net
     healthcheck:
@@ -36,6 +36,7 @@ services:
       - ./config:/workspace/config:ro
       - ./tests:/workspace/tests:ro
       - ./scripts:/workspace/scripts:ro
+      - ./tools:/workspace/tools:ro
       - ./reports:/workspace/reports
       - ./docker/licenses:/var/1C/licenses:ro
     networks:

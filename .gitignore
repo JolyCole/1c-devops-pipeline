@@ -30,3 +30,18 @@ __pycache__/
 .DS_Store
 Thumbs.db
 docker/licenses/*.lic
+# Артефакты сборки — пересоздаются пайплайном
+build/
+ib_test/
+ib_mobile/
+ib_managed/
+
+# Готовые cf-файлы — результат compile, не хранятся в git
+reports/*.cf
+
+# Vanessa Automation (58 МБ, тянется через opm при необходимости)
+tools/vanessa/vanessa-automation/
+
+# Временные
+*.tmp
+*.bak

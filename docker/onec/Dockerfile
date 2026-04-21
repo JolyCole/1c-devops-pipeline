@@ -31,6 +31,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq5 \
         sudo \
         mono-runtime \
+        python3 python3-pip \
+        iproute2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Копируем коммерческий .run-инсталлятор платформы (уже без учебки)
@@ -60,6 +62,8 @@ RUN ln -sf /opt/onescript/bin/oscript /usr/local/bin/oscript \
     && ln -sf /opt/onescript/bin/opm /usr/local/bin/opm
 
 # Ставим vanessa-runner через opm
+RUN pip3 install --no-cache-dir psycopg2-binary
+
 RUN opm install vanessa-runner
 
 # Рабочая папка внутри контейнера

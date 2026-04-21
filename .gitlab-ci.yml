@@ -1,0 +1,92 @@
+# CI/CD пайплайн для автоматизации тестирования конфигураций 1С:Предприятие
+# ВКР Филимонов И.Д., МТУСИ, 2026
+# Тестируются две конфигурации:
+#   - собственная DemoVKR (XML-исходники)
+#   - демонстрационная мобильная конфигурация от фирмы 1С (CF)
+
+stages:
+  - build
+  - test
+
+variables:
+  PLATFORM_PATH: "/opt/1cv8/x86_64/8.3.27.1936"
+
+# ============================================================
+# КОНФИГУРАЦИЯ 1: DemoVKR (собственная разработка, XML)
+# ============================================================
+
+build:demovkr:
+  stage: build
+  script:
+    - echo "Создание ИБ для DemoVKR из XML-исходников"
+    - mkdir -p build/ib_demovkr
+    - rm -rf build/ib_demovkr/*
+    - $PLATFORM_PATH/ibcmd infobase create --db-path=$CI_PROJECT_DIR/build/ib_demovkr --import=$CI_PROJECT_DIR/config/demo-config
+    - ls -la build/ib_demovkr/
+  artifacts:
+    paths:
+      - build/ib_demovkr/
+    expire_in: 1 day
+
+test:syntax:demovkr:
+  stage: test
+  needs:
+    - build:demovkr
+  script:
+    - echo "Синтаксическая проверка DemoVKR"
+    - mkdir -p reports
+    - vrunner syntax-check --ibconnection "/F$CI_PROJECT_DIR/build/ib_demovkr" --junitpath reports/syntax-demovkr.xml
+  artifacts:
+    when: always
+    paths:
+      - reports/
+    reports:
+      junit: reports/syntax-demovkr.xml
+    expire_in: 1 week
+
+test:compile:demovkr:
+  stage: test
+  needs:
+    - build:demovkr
+  script:
+    - echo "Сборка DemoVKR в cf-файл"
+    - mkdir -p reports
+    - vrunner compile --src $CI_PROJECT_DIR/config/demo-config --out reports/DemoVKR.cf
+    - ls -la reports/
+  artifacts:
+    paths:
+      - reports/DemoVKR.cf
+    expire_in: 1 week
+
+# ============================================================
+# КОНФИГУРАЦИЯ 2: Мобильная демо от 1С (готовый .cf)
+# ============================================================
+
+build:mobile:
+  stage: build
+  script:
+    - echo "Создание ИБ для мобильной демо-конфигурации 1С"
+    - mkdir -p build/ib_mobile
+    - rm -rf build/ib_mobile/*
+    - vrunner init-dev --cf $CI_PROJECT_DIR/config/mobile-demo.cf --ibconnection "/F$CI_PROJECT_DIR/build/ib_mobile" --ibcmd
+    - ls -la build/ib_mobile/
+  artifacts:
+    paths:
+      - build/ib_mobile/
+    expire_in: 1 day
+
+test:syntax:mobile:
+  stage: test
+  needs:
+    - build:mobile
+  script:
+    - echo "Синтаксическая проверка мобильной конфигурации"
+    - mkdir -p reports
+    - vrunner syntax-check --ibconnection "/F$CI_PROJECT_DIR/build/ib_mobile" --junitpath reports/syntax-mobile.xml
+  artifacts:
+    when: always
+    paths:
+      - reports/
+    reports:
+      junit: reports/syntax-mobile.xml
+    expire_in: 1 week

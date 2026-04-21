@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ConfigDumpInfo xmlns="http://v8.1c.ru/8.3/xcf/dumpinfo" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" format="Hierarchical" version="2.20">
+	<ConfigVersions>
+		<Metadata name="Catalog.Контрагенты" id="780260d9-3c4f-4ce8-9563-242c9f77a74e" configVersion="741f9a559d46a24e86d28e82089963fd00000000">
+			<Metadata name="Catalog.Контрагенты.Attribute.ИНН" id="f4222269-d29a-4914-8d75-49a507e92d9a"/>
+		</Metadata>
+		<Metadata name="Catalog.Номенклатура" id="e2c5fd03-3e33-4448-8b56-fbdc17f5c1f0" configVersion="90a230858736da4193c7a861461d1a6800000000">
+			<Metadata name="Catalog.Номенклатура.Attribute.Цена" id="ba8ae1e5-31cc-42e5-835b-4e5c0ac3bdf4"/>
+		</Metadata>
+		<Metadata name="Configuration.Конфигурация" id="4b1c08e9-118b-4c88-9b8a-0b63cb616e33" configVersion="b21b2a850db3ea4997bfef67e5b04a4800000000"/>
+		<Metadata name="Document.ЗаказПокупателя" id="940ba6bb-9f8a-41ef-bf12-7c6c5afb59b1" configVersion="37f6366a892df644912a1d0b343691eb00000000">
+			<Metadata name="Document.ЗаказПокупателя.TabularSection.Товары.Attribute.Сумма" id="1b47e909-f86e-4cf9-a82a-4fadeeb07d34"/>
+			<Metadata name="Document.ЗаказПокупателя.TabularSection.Товары.Attribute.Количество" id="8e5ab0bd-92bd-4f0a-8f2c-295767382efb"/>
+			<Metadata name="Document.ЗаказПокупателя.TabularSection.Товары" id="c7ce4965-b0d0-4b13-95ed-9a114026da27"/>
+			<Metadata name="Document.ЗаказПокупателя.Attribute.Контрагенты" id="d4cb7c82-bc24-4a4b-a129-0ad0f0bb8c47"/>
+			<Metadata name="Document.ЗаказПокупателя.TabularSection.Товары.Attribute.Номенклатура" id="efbdd8ef-ec26-47e7-83b4-2f0de09f35f4"/>
+		</Metadata>
+		<Metadata name="Language.Русский" id="b7ecc7f6-9d07-4dd5-b429-b3441c8dad49" configVersion="02a2e0465c30254c867d85d28945f72300000000"/>
+		<Metadata name="Role.ПолныеПрава" id="eca865ac-7bf3-4b1d-a921-fe468ee97135" configVersion="b4b9ab19b57a7c438c154221d8fc25f300000000"/>
+		<Metadata name="Role.ПолныеПрава.Rights" id="eca865ac-7bf3-4b1d-a921-fe468ee97135.0" configVersion="777cb6e10ec1504db94a2244c586410300000000"/>
+		<Metadata name="Subsystem.Основная" id="92b49bd6-3462-4a71-9db7-d72885045649" configVersion="1bdb5a938e549840b0dd6c68daf62e0100000000"/>
+	</ConfigVersions>
+</ConfigDumpInfo>
