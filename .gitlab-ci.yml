@@ -30,7 +30,7 @@ default:
 # STAGE 1: BUILD — сборка файловых ИБ из трёх конфигураций
 # ============================================================
 
-build:managed:
+build-managed:
   stage: build
   script:
     - echo "═══ Сборка Управляемого приложения (основная, из .dt) ═══"
@@ -44,7 +44,7 @@ build:managed:
       - build/ib_managed/
     expire_in: 1 day
 
-build:demovkr:
+build-demovkr:
   stage: build
   script:
     - echo "═══ Сборка DemoVKR (референс, из XML-исходников) ═══"
@@ -57,7 +57,7 @@ build:demovkr:
       - build/ib_demovkr/
     expire_in: 1 day
 
-build:mobile:
+build-mobile:
   stage: build
   script:
     - echo "═══ Сборка мобильной конфигурации (референс, из .cf) ═══"
@@ -74,10 +74,10 @@ build:mobile:
 # STAGE 2: DEPLOY — развёртывание стенда
 # ============================================================
 
-deploy:stand:
+deploy-stand:
   stage: deploy
   needs:
-    - build:managed
+    - build-managed
   script:
     - echo "═══ Развёртывание стенда через scripts/deploy.py ═══"
     - cp $ASSETS_CACHE/managed-app.dt $CI_PROJECT_DIR/config/managed-app.dt
@@ -106,7 +106,7 @@ deploy:stand:
 test-syntax-managed:
   stage: test
   needs:
-    - build:managed
+    - build-managed
   allow_failure: true
   script:
     - echo "═══ Синтаксический анализ Управляемого приложения ═══"
@@ -123,7 +123,7 @@ test-syntax-managed:
 test-bdd-smoke:
   stage: test
   needs:
-    - build:managed
+    - build-managed
   script:
     - echo "═══ BDD smoke: открытие ключевых форм УП ═══"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature
@@ -138,7 +138,7 @@ test-bdd-smoke:
 test-bdd-regression:
   stage: test
   needs:
-    - build:managed
+    - build-managed
   script:
     - echo "═══ BDD regression: CRUD-операции справочников УП ═══"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature
@@ -153,7 +153,7 @@ test-bdd-regression:
 test-bdd-functional:
   stage: test
   needs:
-    - build:managed
+    - build-managed
   script:
     - echo "═══ BDD functional: бизнес-сценарии навигации УП ═══"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature
@@ -168,7 +168,7 @@ test-bdd-functional:
 test-syntax-demovkr:
   stage: test
   needs:
-    - build:demovkr
+    - build-demovkr
   script:
     - echo "═══ Синтаксический анализ DemoVKR (референс) ═══"
     - mkdir -p reports
@@ -184,7 +184,7 @@ test-syntax-demovkr:
 test-syntax-mobile:
   stage: test
   needs:
-    - build:mobile
+    - build-mobile
   allow_failure: true
   script:
     - echo "═══ Синтаксический анализ мобильной (референс) ═══"
