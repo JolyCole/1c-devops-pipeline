@@ -127,6 +127,7 @@ test-bdd-smoke:
   script:
     - echo "BDD smoke - otkrytie klyuchevyh form UP"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature
+    - mkdir -p reports/vanessa && cp -r /home/filimonov/1c-devops-pipeline/reports/vanessa/* reports/vanessa/ 2>/dev/null || true
   artifacts:
     when: always
     paths:
@@ -142,6 +143,7 @@ test-bdd-regression:
   script:
     - echo "BDD regression - CRUD operacii spravochnikov UP"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature
+    - mkdir -p reports/vanessa && cp -r /home/filimonov/1c-devops-pipeline/reports/vanessa/* reports/vanessa/ 2>/dev/null || true
   artifacts:
     when: always
     paths:
@@ -157,6 +159,7 @@ test-bdd-functional:
   script:
     - echo "BDD functional - biznes-scenarii navigacii UP"
     - xvfb-run -a ./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature
+    - mkdir -p reports/vanessa && cp -r /home/filimonov/1c-devops-pipeline/reports/vanessa/* reports/vanessa/ 2>/dev/null || true
   artifacts:
     when: always
     paths:
