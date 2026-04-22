@@ -6,12 +6,13 @@
 set -u
 
 FEATURE_PATH="${1:?Usage: $0 <feature_path>}"
-IB_PATH="${2:-$PWD/build/ib_managed}"
+IB_PATH="${2:-/home/filimonov/1c-devops-pipeline/build/ib_managed}"
 MAX_WAIT="${3:-180}"  # Таймаут в секундах
 
-PROJECT_ROOT="${PROJECT_ROOT:-$PWD}"
+PROJECT_ROOT="/home/filimonov/1c-devops-pipeline"
 JUNIT_DIR="$PROJECT_ROOT/reports/vanessa/junit"
 STATUS_FILE="$PROJECT_ROOT/reports/vanessa/logs/status.txt"
+VANESSA_EPF="$PROJECT_ROOT/tools/vanessa/vanessa-automation/vanessa-automation.epf"
 VANESSA_SETTINGS="$PROJECT_ROOT/tests/VAParams.json"
 
 echo "═══ run_vanessa.sh: запуск ═══"
@@ -36,6 +37,7 @@ vrunner vanessa \
     --db-user "Администратор" \
     --db-pwd "" \
     --path "$FEATURE_PATH" \
+    --pathvanessa "$VANESSA_EPF" \
     --vanessasettings "$VANESSA_SETTINGS" \
     > /tmp/vrunner-output.log 2>&1 &
 VRUNNER_PID=$!
