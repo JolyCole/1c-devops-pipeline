@@ -1,0 +1,74 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1C: deploy стенд (минимальный)",
+      "type": "shell",
+      "command": "python3 scripts/deploy.py",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "1C: deploy стенд (--full с ragent)",
+      "type": "shell",
+      "command": "python3 scripts/deploy.py --full",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "1C: cleanup стенда",
+      "type": "shell",
+      "command": "python3 scripts/deploy.py --cleanup",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "BDD: smoke УП",
+      "type": "shell",
+      "command": "./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "BDD: regression УП",
+      "type": "shell",
+      "command": "./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "BDD: functional УП",
+      "type": "shell",
+      "command": "./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Syntax: проверка УП",
+      "type": "shell",
+      "command": "vrunner syntax-check --ibconnection \"/F${workspaceFolder}/build/ib_managed\" --db-user \"Администратор\" --db-pwd \"\" --junitpath reports/syntax-managed.xml",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Git: push (триггер CI-пайплайна)",
+      "type": "shell",
+      "command": "git add -A && git commit -m \"${input:commitMessage}\" && git push origin main",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "commitMessage",
+      "type": "promptString",
+      "description": "Commit message (будет запушено в main)"
+    }
+  ]
+}
