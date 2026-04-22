@@ -37,7 +37,7 @@ build-managed:
     - mkdir -p build/ib_managed
     - rm -rf build/ib_managed/*
     - cp $ASSETS_CACHE/managed-app.dt $CI_PROJECT_DIR/config/managed-app.dt
-    - $PLATFORM_PATH/ibcmd infobase create --database-path=$CI_PROJECT_DIR/build/ib_managed --restore=$CI_PROJECT_DIR/config/managed-app.dt --locale=ru
+    - $PLATFORM_PATH/ibcmd infobase create --database-path=$CI_PROJECT_DIR/build/ib_managed --restore=$CI_PROJECT_DIR/config/managed-app.dt --locale=ru_RU
     - ls -la build/ib_managed/ | head -8
   artifacts:
     paths:
