@@ -295,7 +295,7 @@ def register_infobase_in_cluster(cluster_uuid: str) -> None:
             "--dbms=PostgreSQL",
             f"--db-server={PG_HOST}",
             f"--db-name={IB_FILE_NAME}",
-            "--locale=ru",
+            "--locale=ru_RU",
             f"--db-user={PG_USER}",
             f"--db-pwd={PG_PASSWORD}",
             "--license-distribution=allow",
@@ -341,7 +341,7 @@ def create_file_infobase() -> None:
             "create",
             f"--database-path={IB_FILE_PATH}",
             f"--restore={IB_DT_PATH}",
-            "--locale=ru",
+            "--locale=ru_RU",
         ]
     )
 
