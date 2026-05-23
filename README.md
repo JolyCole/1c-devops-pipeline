@@ -23,7 +23,8 @@
 ## Архитектура конвейера
 
 Конвейер GitLab CI/CD состоит из четырёх последовательных стадий:
-build -> deploy -> test -> report
+
+`build` -> `deploy` -> `test` -> `report`
 
 **build** — сборка файловых информационных баз из трёх конфигураций (`ibcmd` и `vanessa-runner`).
 
@@ -48,31 +49,32 @@ build -> deploy -> test -> report
 ---
 
 ## Структура репозитория
-.
-├── .gitlab-ci.yml          # описание CI/CD-конвейера (4 стадии)
-├── docker-compose.yml      # PostgreSQL для тестового стенда
-├── config/                 # конфигурации для тестирования
-│   ├── managed-app.dt      # дамп управляемого приложения
-│   ├── demo-config/        # DemoVKR (XML-исходники)
-│   ├── demo-config.cf      # DemoVKR (cf)
-│   └── mobile-demo.cf      # мобильная конфигурация
-├── docker/                 # Dockerfile'ы и дистрибутивы
-│   ├── postgres/           # образ PostgreSQL для 1С
-│   ├── onec/               # образ для тестирования 1С
-│   ├── platform/           # дистрибутивы платформы 1С и PostgreSQL
-│   └── licenses/           # лицензии 1С
-├── scripts/
-│   ├── deploy.py           # развёртывание стенда (PostgreSQL + ИБ)
-│   ├── manage_db.py        # управление базами данных
-│   ├── run_vanessa.sh      # запуск Vanessa-Automation
-│   └── 1c/create_admin.os  # создание администратора (OneScript)
-├── tests/
-│   ├── VAParams.json       # параметры Vanessa-Automation
-│   └── features/           # BDD-сценарии (Gherkin)
-│       ├── smoke/          # открытие ключевых форм
-│       ├── regression/     # CRUD-операции справочников
-│       └── functional/     # бизнес-сценарии навигации
-└── reports/                # результаты тестов (JUnit, статусы, HTML)
+
+    .
+    ├── .gitlab-ci.yml          # описание CI/CD-конвейера (4 стадии)
+    ├── docker-compose.yml      # PostgreSQL для тестового стенда
+    ├── config/                 # конфигурации для тестирования
+    │   ├── managed-app.dt      # дамп управляемого приложения
+    │   ├── demo-config/        # DemoVKR (XML-исходники)
+    │   ├── demo-config.cf      # DemoVKR (cf)
+    │   └── mobile-demo.cf      # мобильная конфигурация
+    ├── docker/                 # Dockerfile'ы и дистрибутивы
+    │   ├── postgres/           # образ PostgreSQL для 1С
+    │   ├── onec/               # образ для тестирования 1С
+    │   ├── platform/           # дистрибутивы платформы 1С и PostgreSQL
+    │   └── licenses/           # лицензии 1С
+    ├── scripts/
+    │   ├── deploy.py           # развёртывание стенда (PostgreSQL + ИБ)
+    │   ├── manage_db.py        # управление базами данных
+    │   ├── run_vanessa.sh      # запуск Vanessa-Automation
+    │   └── 1c/create_admin.os  # создание администратора (OneScript)
+    ├── tests/
+    │   ├── VAParams.json       # параметры Vanessa-Automation
+    │   └── features/           # BDD-сценарии (Gherkin)
+    │       ├── smoke/          # открытие ключевых форм
+    │       ├── regression/     # CRUD-операции справочников
+    │       └── functional/     # бизнес-сценарии навигации
+    └── reports/                # результаты тестов (JUnit, статусы, HTML)
 
 ---
 
@@ -97,40 +99,46 @@ build -> deploy -> test -> report
 ### Через GitLab CI/CD (основной способ)
 
 Любой push в ветку `main` запускает конвейер автоматически:
-git push origin main
+
+    git push origin main
 
 Ручной перезапуск без изменений в коде:
-git commit --allow-empty -m "rerun pipeline"
-git push origin main
+
+    git commit --allow-empty -m "rerun pipeline"
+    git push origin main
 
 Состояние конвейера: https://gitlab.com/JolyCole/1c-devops-pipeline/-/pipelines
 
 ### Локальное развёртывание стенда
-python3 scripts/deploy.py            # PostgreSQL + файловая ИБ из managed-app.dt
-python3 scripts/deploy.py --full     # дополнительно сервер 1С
+
+    python3 scripts/deploy.py            # PostgreSQL + файловая ИБ из managed-app.dt
+    python3 scripts/deploy.py --full     # дополнительно сервер 1С
 
 ### Локальный прогон BDD-тестов
-xvfb-run -a ./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature
-xvfb-run -a ./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature
-xvfb-run -a ./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature
+
+    xvfb-run -a ./scripts/run_vanessa.sh tests/features/smoke/01_managed_smoke.feature
+    xvfb-run -a ./scripts/run_vanessa.sh tests/features/regression/01_managed_crud.feature
+    xvfb-run -a ./scripts/run_vanessa.sh tests/features/functional/01_managed_search.feature
 
 ---
 
 ## Просмотр результатов
-cat reports/vanessa/junit/junit.xml     # JUnit-отчёт BDD-прогона
-cat reports/vanessa/logs/status.txt     # код статуса (0 = успех)
-cat reports/syntax-managed.xml          # результат статического анализа
+
+    cat reports/vanessa/junit/junit.xml     # JUnit-отчёт BDD-прогона
+    cat reports/vanessa/logs/status.txt     # код статуса (0 = успех)
+    cat reports/syntax-managed.xml          # результат статического анализа
 
 Сводный HTML-отчёт формируется на стадии report и доступен в артефактах конвейера (`reports/html/aggregated-report.html`).
 
 ---
 
 ## Диагностика
-sudo gitlab-runner status               # состояние GitLab Runner
-docker compose ps                        # контейнер PostgreSQL
-docker logs onec-postgres                # логи PostgreSQL
-pkill -9 -f "1cv8c.*TESTCLIENT"          # снять зависшие процессы 1С
-pkill -9 -f "vrunner"
+
+    sudo gitlab-runner status               # состояние GitLab Runner
+    docker compose ps                       # контейнер PostgreSQL
+    docker logs onec-postgres               # логи PostgreSQL
+    pkill -9 -f "1cv8c.*TESTCLIENT"         # снять зависшие процессы 1С
+    pkill -9 -f "vrunner"
 
 ---
 
